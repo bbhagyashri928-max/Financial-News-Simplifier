@@ -1,411 +1,423 @@
-
 # 📈 FinNews AI — Financial News Simplification Platform
 
 > **Transforming complex financial news and Wall Street jargon into crystal-clear, beginner-friendly explanations with Groq LLaMA 3.3 70B & FastAPI.**
 
-[![Python](https://img.shields.io/badge/Python-3.11%2B-blue.svg)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688.svg)](https://fastapi.tiangolo.com)
-[![Groq](https://img.shields.io/badge/AI_Engine-Groq_LLaMA_3.3_70B-purple.svg)](https://groq.com)
-[![NewsAPI](https://img.shields.io/badge/News_Feed-NewsAPI-orange.svg)](https://newsapi.org)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg?style=flat&logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688.svg?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Groq](https://img.shields.io/badge/AI_Engine-Groq_LLaMA_3.3_70B-F55036.svg?style=flat)](https://groq.com)
+[![NewsAPI](https://img.shields.io/badge/News_Feed-NewsAPI-FF6B6B.svg?style=flat)](https://newsapi.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat)](LICENSE)
 
 ---
 
-## 📑 Table of Contents
-1. [Overview & Problem Statement](#-overview--problem-statement)
-2. [Product Principles](#-important-product-principles)
-3. [Architecture & Data Flow](#-technical-architecture)
-4. [Technology Stack](#-technology-stack)
-5. [Directory Structure](#-directory-structure)
-6. [Key Features](#-key-features)
-7. [Environment Variables](#-environment-variables)
-8. [Installation & Local Setup](#-installation--local-setup)
-9. [API Documentation](#-api-endpoints)
-10. [AI & Prompt Engineering](#-ai--prompt-engineering)
-11. [News Ingestion, Caching & Deduplication](#-news-ingestion--caching)
-12. [Security & Prompt Injection Defense](#-security--guardrails)
-13. [Testing Suite](#-testing)
-14. [Deployment Guide](#-deployment-guide)
-15. [System & Functional Requirements](#-system-requirements)
-16. [Troubleshooting](#-troubleshooting)
-17. [Future Roadmap](#-future-roadmap)
+## 📖 Overview
+
+Financial news and macroeconomic reporting are often filled with dense jargon, complex acronyms (*EBITDA, Basis Points, Quantitative Tightening, Yield Curve Inversion*), and convoluted analysis that make them difficult for everyday readers to understand.
+
+**FinNews AI** bridges this gap by automatically fetching live global financial news and utilizing Groq's high-speed **LLaMA 3.3 70B Versatile** large language model to translate complex financial articles into plain, accessible, and structured English.
+
+### Who is it for?
+* 🎓 **Students & Beginners**: Learn economics and finance through real-world news without getting lost in technical terminology.
+* 💼 **Retail Investors**: Understand the core facts, market context, and implications behind breaking news stories quickly.
+* 📱 **Everyday Consumers**: Discover how Federal Reserve decisions, inflation figures, and market movements impact mortgages, savings, and living costs.
 
 ---
 
-## 🎯 Overview & Problem Statement
+## ✨ Features
 
-Financial and economic reporting is dense, full of confusing acronyms (e.g., *EBITDA, Basis Points, Quantitative Tightening, Yield Inversion*), and difficult for non-experts to digest. Retail investors, university students, and everyday consumers often struggle to understand how major economic announcements affect their personal finances.
-
-**FinNews AI** bridges this knowledge gap by ingesting real-time global financial news and utilizing Groq's high-speed **LLaMA 3.3 70B Versatile** model to:
-* Extract core facts and create 2-3 sentence summaries.
-* Decode and explain complex financial terms in plain English.
-* Provide balanced, objective context on why each story matters.
-* Identify affected consumer and market groups without giving financial advice.
-
----
-
-## ⚖️ Important Product Principles
-
-FinNews AI is an **information simplification and educational platform**, NOT an automated financial or investment advisory tool.
-
-* ❌ **The AI NEVER**: guarantees market profits, issues `BUY` or `SELL` directives, fabricates figures, or offers personalized portfolio management.
-* ✅ **The AI ALWAYS**: maintains strict neutrality, uses objective language (*"The article reports that..."*), isolates third-party content against prompt injections, and clearly separates source facts from AI explanations.
+- 📰 **Real-Time Financial News Stream**: Live news ingestion filtered across categories (*All, Markets, Economy, Business, Technology*).
+- 🔍 **Interactive Keyword Search**: Search across global financial headlines, company tickers, and economic subjects.
+- ⚡ **AI-Powered News Simplification**: 2-3 sentence plain-English summaries powered by **Groq LLaMA 3.3 70B Versatile**.
+- 💡 **Financial Jargon Decoded**: Automatically identifies complex terms and provides clear, beginner-friendly definitions.
+- 🎯 **Key Takeaways**: Extracts crucial numerical figures, dates, and milestone developments.
+- 📊 **Objective Market Relevance**: Explains how sector or policy shifts influence broader markets without offering financial advice.
+- 👥 **Affected Groups Breakdown**: Highlights specific demographic or economic groups impacted (e.g., *Borrowers, Homeowners, Tech Firms*).
+- 🛡️ **Prompt Injection Guardrails**: Strict untrusted input delimiters (`<<<UNTRUSTED_ARTICLE_CONTENT>>>`) defend against prompt exploits.
+- ⚡ **In-Memory TTL Caching**: High-efficiency caching engine reduces redundant external API calls to NewsAPI and Groq.
+- 📦 **Batch Article Simplification**: Simplifies up to 10 articles concurrently with semaphore-bounded concurrency control.
+- 🎨 **Modern Fintech UI**: Responsive interface with dark/light mode toggle and interactive modal states.
+- 🚀 **Asynchronous FastAPI Backend**: Production-ready async REST API with strict Pydantic v2 schema validation.
 
 ---
 
-## 🏗️ Technical Architecture
+## 🧠 How It Works
 
-```text
-                         ┌──────────────────────┐
-                         │        USER          │
-                         │   Desktop / Mobile   │
-                         └──────────┬───────────┘
-                                    │
-                                    ▼
-                         ┌──────────────────────┐
-                         │      FRONTEND        │
-                         │  (HTML5 + CSS3 + JS) │
-                         │ • News Dashboard     │
-                         │ • Search & Filters   │
-                         │ • Dynamic AI Cards   │
-                         │ • Terms Glossary     │
-                         └──────────┬───────────┘
-                                    │
-                               HTTP / REST
-                                    │
-                                    ▼
-                         ┌──────────────────────┐
-                         │   FASTAPI BACKEND    │
-                         │                      │
-                         │ • Routes & Validation│
-                         │ • Global Exception   │
-                         │ • Sanitization       │
-                         │ • TTL Cache Engine   │
-                         └──────┬─────────┬─────┘
-                                │         │
-                                │         │
-                                ▼         ▼
-                      ┌─────────────┐ ┌──────────────┐
-                      │   NewsAPI   │ │   Groq API   │
-                      │             │ │              │
-                      │ Live News   │ │ LLaMA 3.3    │
-                      │ Ingestion   │ │ 70B Engine   │
-                      └──────┬──────┘ └──────┬───────┘
-                             │               │
-                             └───────┬───────┘
-                                     ▼
-                           ┌─────────────────────┐
-                           │ Processed Financial │
-                           │ News + AI Summary   │
-                           └──────────┬──────────┘
-                                      │
-                                      ▼
-                             Frontend Display
+```mermaid
+flowchart TD
+    User([👤 User]) -->|1. Browse / Search / Select Article| UI[🖥️ Frontend UI]
+    UI -->|2. HTTP GET /api/news| API[⚡ FastAPI Backend]
+    API -->|3. Fetch Headlines| News[(📰 NewsAPI)]
+    News -->|4. Return Raw Articles| API
+    UI -->|5. HTTP POST /api/simplify| API
+    API -->|6. Clean & Wrap in Safety Delimiters| Prompt[🛡️ Guardrail Engine]
+    Prompt -->|7. Structured Prompt| Groq[(⚡ Groq Cloud)]
+    Groq -->|8. LLaMA 3.3 70B Inference| Groq
+    Groq -->|9. Strict JSON Output| API
+    API -->|10. Validated Pydantic Schema| UI
+    UI -->|11. Display Plain-English Cards & Glossary| User
 ```
 
----
-
-## 💻 Technology Stack
-
-| Layer | Technology | Purpose |
-| :--- | :--- | :--- |
-| **Frontend** | Vanilla HTML5, CSS3, JavaScript ES6+ | High-performance, zero-dependency fintech UI |
-| **Styling** | Custom Responsive CSS Design Tokens | Dark/Light theme, glassmorphism, micro-animations |
-| **Backend** | Python 3.11+, FastAPI, Uvicorn | High-throughput asynchronous REST API |
-| **Validation** | Pydantic v2 & Pydantic-Settings | Strict schema enforcement and type safety |
-| **AI Inference** | Groq Cloud API (`llama-3.3-70b-versatile`) | Ultra-fast LLM reasoning and JSON simplification |
-| **News Retrieval**| NewsAPI (`https://newsapi.org`) | Live global financial and market headlines |
-| **HTTP Client** | `httpx` (async) | Async connection pooling, timeouts, and rate handling |
-| **Testing** | `pytest`, `pytest-asyncio`, `pytest-mock` | Comprehensive unit and integration test suite |
+### Process Flow:
+1. **News Retrieval**: The backend queries NewsAPI for the latest verified financial reports, deduplicating articles by canonical URL and title signatures.
+2. **Sanitization & Isolation**: HTML tags, script blocks, and tracking artifacts are stripped. The article text is wrapped in prompt injection isolation boundaries.
+3. **LLaMA 3.3 70B Inference**: Groq processes the structured prompt and generates a strict JSON payload containing summaries, takeaways, jargon definitions, and context.
+4. **Validation & Rendering**: FastAPI validates the response via Pydantic schemas and delivers it to the frontend for instant viewing.
 
 ---
 
-## 📁 Directory Structure
+## 🏗️ Project Architecture
 
 ```text
-finnews-ai/
+Financial-News-Simplifier/
+│
 ├── backend/
 │   ├── app/
-│   │   ├── __init__.py
-│   │   ├── main.py                  # FastAPI entrypoint, CORS, exception handlers
 │   │   ├── api/
-│   │   │   ├── __init__.py
-│   │   │   ├── health.py            # /health monitoring endpoint
-│   │   │   ├── news.py              # /api/news and /api/news/search
-│   │   │   └── simplify.py          # /api/simplify and /api/simplify/batch
-│   │   ├── services/
-│   │   │   ├── __init__.py
-│   │   │   ├── news_service.py      # NewsAPI client, deduplication, TTL cache
-│   │   │   ├── groq_service.py      # Groq LLaMA 3.3 70B integration & JSON parser
-│   │   │   └── summarization_service.py # Coordination, cleaning, semaphore
-│   │   ├── schemas/
-│   │   │   ├── __init__.py
-│   │   │   ├── news_schema.py       # Article, NewsResponse, ErrorResponse
-│   │   │   └── summary_schema.py    # SimplificationResult, SimplifyRequest/Response
+│   │   │   ├── health.py                 # /health monitoring endpoint
+│   │   │   ├── news.py                   # /api/news and /api/news/search endpoints
+│   │   │   └── simplify.py               # /api/simplify and /api/simplify/batch endpoints
 │   │   ├── core/
-│   │   │   ├── __init__.py
-│   │   │   ├── config.py            # Pydantic BaseSettings and masked logging
-│   │   │   └── logging_config.py    # Structured console logging
-│   │   └── utils/
-│   │       ├── __init__.py
-│   │       ├── prompts.py           # Master system prompt and injection guardrails
-│   │       └── text_cleaner.py      # HTML stripping, whitespace, length truncator
-│   ├── tests/
+│   │   │   ├── config.py                 # Pydantic BaseSettings & masked logging
+│   │   │   └── logging_config.py         # Structured application logger
+│   │   ├── schemas/
+│   │   │   ├── news_schema.py            # Article, NewsResponse, ErrorResponse schemas
+│   │   │   └── summary_schema.py         # SimplificationResult & Request schemas
+│   │   ├── services/
+│   │   │   ├── groq_service.py           # Groq LLaMA 3.3 70B integration & JSON parser
+│   │   │   ├── news_service.py           # NewsAPI client, deduplication & TTL cache
+│   │   │   └── summarization_service.py  # Orchestration & concurrency control
+│   │   ├── utils/
+│   │   │   ├── prompts.py                # System prompts & injection guardrails
+│   │   │   └── text_cleaner.py           # HTML stripping & text sanitization
 │   │   ├── __init__.py
-│   │   ├── conftest.py              # Pytest fixtures and mock payloads
-│   │   ├── test_health.py           # Health and root router tests
-│   │   ├── test_news.py             # NewsAPI, cache, deduplication tests
-│   │   └── test_simplify.py         # Groq LLM parsing, validation, batch tests
-│   ├── requirements.txt             # Python backend dependencies
-│   ├── .env.example                 # Safe environment configuration template
-│   └── README.md                    # Backend specific guide
+│   │   └── main.py                       # FastAPI entrypoint, CORS & error handlers
+│   ├── tests/
+│   │   ├── conftest.py                   # Pytest fixtures & mock payloads
+│   │   ├── test_health.py                # Health check & root route tests
+│   │   ├── test_news.py                  # NewsAPI caching & deduplication tests
+│   │   └── test_simplify.py              # AI inference, JSON parser & batch tests
+│   ├── .env.example                      # Safe environment variables template
+│   ├── README.md                         # Backend-specific guide
+│   └── requirements.txt                  # Python dependencies
+│
 ├── frontend/
-│   ├── index.html                   # Semantic HTML5 single-page application
-│   ├── styles.css                   # Fintech design system & dark mode tokens
-│   ├── app.js                       # Modular JavaScript ES6+ application logic
-│   └── assets/                      # Static icons and assets
-├── .gitignore                       # Ignored files (.env, venv, pycache, etc.)
-├── README.md                        # Master project documentation
-└── LICENSE                          # MIT License
+│   ├── index.html                        # Single-page application markup
+│   ├── styles.css                        # Modern fintech styling & dark mode tokens
+│   └── app.js                            # Frontend UI logic, state & API client
+│
+├── .gitignore                            # Git ignore rules
+├── LICENSE                               # MIT License
+├── package.json                          # Concurrently runner scripts
+└── README.md                             # Master project documentation
 ```
 
 ---
 
-## ✨ Key Features
+## 🛠️ Tech Stack
 
-1. **Live Financial News Stream**: Real-time articles categorized into *All, Markets, Economy, Business, Technology*.
-2. **AI-Powered Simplification**: 2-3 sentence plain-English summary powered by LLaMA 3.3 70B.
-3. **Financial Jargon Decoded**: Interactive chips that reveal clear explanations of terms like Inflation, Yield Curve, EPS, and Rate Hikes.
-4. **Key Takeaways**: Instant bullet points capturing critical numbers, dates, and milestones.
-5. **Objective Market Relevance**: Explains how policy or sector shifts might impact everyday borrowers and investors neutrally.
-6. **Multi-Stage Loading State**: Informative skeleton animations indicating news ingestion and AI reasoning progress.
-7. **Prompt Injection Guardrails**: Strict untrusted-content delimiters (`<<<UNTRUSTED_ARTICLE_CONTENT>>>`) prevent adversarial prompt exploits.
-8. **In-Memory TTL Caching**: Eliminates duplicate NewsAPI and Groq requests.
-9. **One-Click Batch Simplification**: Simplify top financial stories with a single click.
-10. **Modern Dark/Light Mode**: Polished fintech aesthetics adhering to modern web design standards.
+| Layer | Technology | Purpose |
+|:---|:---|:---|
+| **Frontend** | HTML5, CSS3, JavaScript (ES6+) | Lightweight, zero-dependency fintech user interface |
+| **Backend** | Python 3.11+, FastAPI, Uvicorn | High-performance asynchronous REST API |
+| **AI Engine** | Groq Cloud API | Ultra-low latency LLaMA 3.3 70B Versatile inference |
+| **Data Ingestion** | NewsAPI | Real-time global financial news and market feeds |
+| **Validation** | Pydantic v2 & Pydantic-Settings | Strict request/response validation and settings management |
+| **HTTP Client** | `httpx` (async) | Async connection pooling, retries, and timeout management |
+| **Testing** | `pytest`, `pytest-asyncio`, `pytest-mock` | Comprehensive unit and integration test coverage |
 
 ---
 
-## 🔑 Environment Variables
+## 🚀 Getting Started
 
-Copy `backend/.env.example` to `backend/.env`:
+### Prerequisites
 
+* **Python**: `3.11` or higher
+* **Node.js & npm** *(Optional)*: For running frontend and backend concurrently via `npm run dev`
+* **API Keys**:
+  * [Groq API Key](https://console.groq.com) (Free tier available)
+  * [NewsAPI Key](https://newsapi.org) (Free tier available)
+
+---
+
+### Installation & Setup
+
+#### 1. Clone the Repository
+```bash
+git clone https://github.com/bbhagyashri928-max/Financial-News-Simplifier.git
+cd Financial-News-Simplifier
+```
+
+#### 2. Configure Environment Variables
+Create a `.env` file inside the `backend/` directory from the template:
+
+```bash
+# Windows
+copy backend\.env.example backend\.env
+
+# Linux / macOS
+cp backend/.env.example backend/.env
+```
+
+Edit `backend/.env` with your API credentials:
 ```env
-# NewsAPI Configuration (https://newsapi.org)
 NEWS_API_KEY=your_newsapi_key_here
-
-# Groq API Configuration (https://console.groq.com)
 GROQ_API_KEY=your_groq_api_key_here
 GROQ_MODEL=llama-3.3-70b-versatile
-
-# Server Settings
 BACKEND_HOST=0.0.0.0
 BACKEND_PORT=8000
 ENVIRONMENT=development
-
-# CORS Settings (comma-separated origins)
 FRONTEND_ORIGIN=http://localhost:5500,http://127.0.0.1:5500
-
-# Performance and Limits
 NEWS_CACHE_MINUTES=10
 MAX_ARTICLE_LENGTH=12000
 ```
 
-> [!NOTE]
-> Sensitive keys are masked on startup and are never exposed via endpoints or client scripts.
+> [!WARNING]
+> Never commit `.env` files, API keys, tokens, or other secrets to GitHub.
 
 ---
 
-## 🚀 Installation & Local Setup
+### Running the Application
 
-### 1. Backend Setup
+#### Option A: Quickstart via npm (Recommended)
+If you have Node.js installed, start both backend and frontend concurrently:
+```bash
+npm install
+npm run dev
+```
 
-```powershell
-# Navigate to backend directory
+#### Option B: Manual Setup
+
+**Terminal 1 — Backend (FastAPI)**:
+```bash
 cd backend
-
-# Create virtual environment
 python -m venv venv
 
 # Activate virtual environment
+# Windows:
 venv\Scripts\activate
+# Linux/macOS:
+source venv/bin/activate
 
-# Install requirements
+# Install dependencies
 pip install -r requirements.txt
 
-# Launch FastAPI backend
+# Start FastAPI server
 uvicorn app.main:app --reload --port 8000
 ```
 
-The backend starts at `http://localhost:8000`.
-
-### 2. Frontend Setup
-
-In a new terminal window:
-```powershell
-# Navigate to frontend directory
+**Terminal 2 — Frontend**:
+```bash
 cd frontend
-
-# Start local HTTP server
 python -m http.server 5500
 ```
 
-Open `http://localhost:5500` in your browser.
+---
+
+## 🌐 Application URLs
+
+| Service | URL | Description |
+|:---|:---|:---|
+| **Frontend UI** | `http://localhost:5500` | News feed and AI simplification dashboard |
+| **Backend API** | `http://localhost:8000` | Root status metadata endpoint |
+| **Swagger UI** | `http://localhost:8000/docs` | Interactive API documentation |
+| **ReDoc UI** | `http://localhost:8000/redoc` | Clean alternate API documentation |
 
 ---
 
 ## 📡 API Endpoints
 
-### 1. Root & Health Check
-* `GET /`: Returns service metadata and operational status.
-* `GET /health`: Returns service health status and configuration availability (`news_api_configured`, `groq_configured`).
+### 1. Root & Health
+
+#### `GET /`
+Returns service operational status and metadata.
+```json
+{
+  "name": "FinNews AI",
+  "description": "AI-powered financial news simplification platform",
+  "version": "1.0.0",
+  "status": "running"
+}
+```
+
+#### `GET /health`
+Returns configuration health without exposing secrets.
+```json
+{
+  "status": "healthy",
+  "service": "FinNews AI",
+  "news_api_configured": true,
+  "groq_configured": true
+}
+```
+
+---
 
 ### 2. Financial News
-* `GET /api/news`:
-  * Parameters: `category` (*all, markets, economy, business, technology*), `query`, `page`, `page_size`.
-  * Response: Standard `NewsResponse` containing validated, deduplicated articles.
-* `GET /api/news/search`:
-  * Parameters: `query`, `page`, `page_size`.
+
+#### `GET /api/news`
+Fetches verified, normalized, and deduplicated financial news articles.
+
+| Parameter | Type | Default | Description |
+|:---|:---|:---|:---|
+| `category` | `string` | `"all"` | Filter: `all`, `markets`, `economy`, `business`, `technology` |
+| `query` | `string` | `null` | Optional search keyword or ticker symbol |
+| `page` | `integer` | `1` | Page number (`1` to `20`) |
+| `page_size` | `integer` | `10` | Articles per page (`1` to `50`) |
+
+#### `GET /api/news/search`
+Searches articles by query string.
+
+| Parameter | Type | Required | Description |
+|:---|:---|:---|:---|
+| `query` | `string` | **Yes** | Search keyword, company name, or ticker |
+| `page` | `integer` | No (`1`) | Page number |
+| `page_size` | `integer` | No (`10`) | Articles per page |
+
+---
 
 ### 3. AI Simplification
-* `POST /api/simplify`:
-  * Request Body:
-    ```json
-    {
-      "title": "Fed Holds Benchmark Rate Steady at 5.25%",
-      "description": "The Federal Reserve left interest rates unchanged...",
-      "content": "Full article text...",
-      "source": "Reuters",
-      "url": "https://..."
-    }
-    ```
-  * Response:
-    ```json
-    {
-      "status": "success",
-      "article": { "title": "...", "source": "..." },
-      "simplification": {
-        "simple_summary": "...",
-        "key_points": ["..."],
-        "financial_terms": [{ "term": "...", "explanation": "..." }],
-        "why_it_matters": "...",
-        "market_relevance": "...",
-        "affected_groups": ["..."]
+
+#### `POST /api/simplify`
+Simplifies a single financial news article into plain English.
+
+**Request Body**:
+```json
+{
+  "title": "Federal Reserve Holds Interest Rates Steady Amid Inflation Easing",
+  "description": "The Federal Reserve left its benchmark lending rate unchanged at 5.25%-5.50%...",
+  "content": "The Federal Open Market Committee concluded its two-day meeting today...",
+  "source": "Financial Times",
+  "url": "https://example.com/article"
+}
+```
+
+**Response**:
+```json
+{
+  "status": "success",
+  "article": {
+    "title": "Federal Reserve Holds Interest Rates Steady Amid Inflation Easing",
+    "source": "Financial Times",
+    "url": "https://example.com/article"
+  },
+  "simplification": {
+    "simple_summary": "The Federal Reserve decided not to change interest rates, keeping them between 5.25% and 5.50%. Officials noted that while inflation has slowed down, they want to see further progress before considering rate cuts.",
+    "key_points": [
+      "Interest rates remain unchanged at 5.25% - 5.50%.",
+      "Inflation is declining towards the 2% target, but central bankers remain cautious.",
+      "No immediate rate cuts are expected in the next meeting."
+    ],
+    "financial_terms": [
+      {
+        "term": "Federal Reserve",
+        "explanation": "The central banking system of the United States that manages monetary policy and sets interest rates."
+      },
+      {
+        "term": "Benchmark Rate",
+        "explanation": "The baseline interest rate set by the central bank that influences borrowing costs across banks and consumers."
       }
-    }
-    ```
-* `POST /api/simplify/batch`: Processes up to 10 articles concurrently with bounded concurrency.
+    ],
+    "why_it_matters": "When interest rates stay high, borrowing money for mortgages, cars, and credit cards remains expensive, but savings accounts generally earn higher interest.",
+    "market_relevance": "Stock markets often react positively to signs that rate hikes have concluded, while bond yields stabilize.",
+    "affected_groups": [
+      "Homebuyers and mortgage seekers",
+      "Credit card borrowers",
+      "Savers with high-yield savings accounts"
+    ]
+  }
+}
+```
 
----
-
-## 🧠 AI & Prompt Engineering
-
-Prompts are centralized in `backend/app/utils/prompts.py`.
-
-### Safety & System Prompt Rules
-1. Never invent facts, numbers, or sources.
-2. Clearly distinguish article facts (*"The article reports that..."*) from contextual explanations.
-3. Plain-English explanations suitable for high-school level comprehension.
-4. Strictly forbidden from producing `BUY` / `SELL` advice or profit guarantees.
-5. All untrusted publisher input is isolated:
-   ```text
-   <<<UNTRUSTED_ARTICLE_CONTENT>>>
-   {article_text}
-   <<<END_UNTRUSTED_ARTICLE_CONTENT>>>
-   ```
-6. Enforced structured JSON output matching Pydantic schemas.
-
----
-
-## 📰 News Ingestion & Caching
-
-* **Source**: NewsAPI (`https://newsapi.org/v2/everything`).
-* **Deduplication Engine**: Evaluates canonical URL and normalized `title::source` strings to filter out syndicated reprints.
-* **In-Memory TTL Cache**: Caches query results for `NEWS_CACHE_MINUTES` (default: 10 mins) to optimize API quota consumption.
-* **Sanitization**: Strips HTML tags, script blocks, tracking URL parameters, and caps text at `MAX_ARTICLE_LENGTH`.
-
----
-
-## 🛡️ Security & Guardrails
-
-* **Secret Protection**: API keys are isolated in backend `.env` and never transferred to client browsers.
-* **CORS Restrictions**: Configurable allowed origins via `FRONTEND_ORIGIN`.
-* **Payload Length Limits**: Enforces input size caps to prevent denial-of-service and context overflow.
-* **Sanitized Error Responses**: Internal stack traces are logged securely on the server and replaced with client-safe error codes (`NEWS_API_ERROR`, `GROQ_API_RATE_LIMIT`, `AI_RESPONSE_ERROR`, etc.).
+#### `POST /api/simplify/batch`
+Processes up to 10 articles concurrently with bounded rate protection.
 
 ---
 
 ## 🧪 Testing
 
-The backend includes a comprehensive test suite in `backend/tests/`:
+The project includes an automated test suite with full mock coverage for NewsAPI and Groq endpoints (no external API calls or quota consumption during test runs).
 
-```powershell
-python -m pytest backend/tests -v
+Run tests with `pytest`:
+```bash
+# Run all tests
+pytest backend/tests -v
+
+# Or via npm script
+npm test
 ```
 
-### Test Coverage Highlights:
-* `test_health.py`: Verifies `/` and `/health` configuration masking.
-* `test_news.py`: Validates news parsing, in-memory caching, deduplication, rate limits, timeouts, and missing API key handling.
+### Test Suite Summary:
+* `test_health.py`: Validates root metadata and `/health` configuration masking.
+* `test_news.py`: Tests news parsing, in-memory caching, deduplication, pagination, and error recovery.
 * `test_simplify.py`: Verifies Groq LLaMA JSON output, markdown fence stripping, short-payload rejection, rate limits, timeouts, malformed output recovery, and batch processing.
 
 ---
 
-## 🌐 Deployment Guide
+## 🖥️ Application Screenshots
 
-### Frontend Deployment (Vercel / Netlify / Cloudflare Pages)
-* Deploy the `frontend/` folder to any static hosting provider.
-* Configure the backend URL in `frontend/app.js` or via a global config:
-  ```html
-  <script>
-    window.APP_CONFIG = { API_BASE_URL: "https://your-backend-api.onrender.com" };
-  </script>
-  ```
+<!-- Screenshots placeholder section -->
+| News Feed & Search | AI Simplified View |
+|:---:|:---:|
+| ![FinNews AI Dashboard](docs/screenshots/home.png) | ![AI Simplification Modal](docs/screenshots/simplified_modal.png) |
 
-### Backend Deployment (Render / Railway / Google Cloud Run)
-* Build container or Python environment using `backend/requirements.txt`.
-* Start command:
-  ```bash
-  uvicorn app.main:app --host 0.0.0.0 --port 8000
-  ```
-* Set production environment variables in your cloud dashboard (`NEWS_API_KEY`, `GROQ_API_KEY`, `FRONTEND_ORIGIN`).
+*(Place screenshots in `docs/screenshots/` to display them here)*
 
 ---
 
-## 📋 System Requirements
+## 🔮 Future Improvements
 
-* **Operating System**: Windows, macOS, or Linux
-* **Python**: Python 3.11 or higher
-* **Memory**: 4 GB RAM minimum (8 GB recommended)
-* **Browser**: Chrome, Firefox, Edge, or Safari (modern ES6+ support)
-
----
-
-## 🔍 Troubleshooting
-
-| Issue | Cause | Solution |
-| :--- | :--- | :--- |
-| `MISSING_CONFIGURATION` | `NEWS_API_KEY` or `GROQ_API_KEY` missing in `.env` | Copy `.env.example` to `.env` and insert valid API keys. |
-| `NEWS_API_RATE_LIMIT` | Exceeded NewsAPI 100 requests/day free tier | Wait for quota reset or adjust `NEWS_CACHE_MINUTES` to cache longer. |
-| `GROQ_API_RATE_LIMIT` | Exceeded Groq requests per minute | The system will handle retries; wait a few moments before re-simplifying. |
-| `Service Unavailable` badge | Backend is not running on port 8000 | Ensure Uvicorn is running: `uvicorn app.main:app --reload --port 8000`. |
+- [ ] 👤 **Personalized Watchlists & Bookmarks**: Save articles and follow specific stock tickers or topics.
+- [ ] 🌐 **Multilingual Simplification**: Support for Hindi, Spanish, Marathi, French, and German.
+- [ ] 📊 **Market Sentiment Gauge**: Visual AI sentiment rating (*Bullish / Neutral / Bearish*).
+- [ ] 🎙️ **Audio Summaries (TTS)**: Listen to simplified news briefings on the go.
+- [ ] 💬 **Interactive AI Financial Q&A**: Ask follow-up questions on specific news articles.
+- [ ] 📈 **Historical Market Impact**: Compare current news patterns with historical market reactions.
 
 ---
 
-## 🔮 Future Roadmap
+## ⚠️ Disclaimer
 
-* 👤 **User Profiles & Bookmarks**: Save preferred articles and create customized portfolios.
-* 🌐 **Multilingual Simplification**: Hindi, Spanish, Marathi, French, and Japanese summaries.
-* 🎙️ **Text-to-Speech (TTS)**: Listen to simplified financial briefings on the go.
-* 💬 **AI Financial Chat**: Interactive Q&A regarding specific articles and economic reports.
-* 📊 **Market Sentiment Indicators**: Visual sentiment gauge (Bullish / Neutral / Cautious).
+FinNews AI is an educational and informational project. It simplifies publicly available financial news and should **not** be considered financial, investment, trading, tax, or legal advice.
+
+Users should independently verify information and consult qualified financial advisors before making investment or financial decisions.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Follow these steps:
+
+1. **Fork the Repository**
+2. **Create a Feature Branch**:
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+3. **Commit your Changes**:
+   ```bash
+   git commit -m "feat: Add amazing feature"
+   ```
+4. **Push to the Branch**:
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+5. **Open a Pull Request**
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-#   F i n a n c i a l - N e w s - S i m p l i f i e r  
- #   F i n a n c i a l - N e w s - S i m p l i f i e r  
- #   F i n a n c i a l - N e w s - S i m p l i f i e r  
- #   F i n a n c i a l - N e w s - S i m p l i f i e r  
- 
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👨‍💻 Author / Project
+
+Created and maintained by **[bbhagyashri928-max](https://github.com/bbhagyashri928-max)**.
+
+Repository: **[https://github.com/bbhagyashri928-max/Financial-News-Simplifier](https://github.com/bbhagyashri928-max/Financial-News-Simplifier)**
+
+---
+
+## ⭐ Support
+
+If you find **FinNews AI** helpful or educational, please give this repository a ⭐ star on GitHub!
