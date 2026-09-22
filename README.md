@@ -407,4 +407,5 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 #   F i n a n c i a l - N e w s - S i m p l i f i e r  
  #   F i n a n c i a l - N e w s - S i m p l i f i e r  
  #   F i n a n c i a l - N e w s - S i m p l i f i e r  
+ #   F i n a n c i a l - N e w s - S i m p l i f i e r  
  
